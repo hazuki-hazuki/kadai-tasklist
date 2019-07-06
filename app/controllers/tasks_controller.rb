@@ -1,6 +1,9 @@
 class TasksController < ApplicationController
- before_action :set_task, only: [:show, :edit, :update, :destroy]
+ include SessionsHelper
+ 
  before_action :require_user_logged_in
+ before_action :set_task, only: [:show, :edit, :update, :destroy, :edit]
+
  
 
   def index
@@ -9,7 +12,12 @@ class TasksController < ApplicationController
     end
   end
 
+
   def show
+    @task = current_user.tasks.find_by(id: params[:id])
+    unless @task
+     redirect_to login_url
+    end
   end
 
   def new
@@ -31,8 +39,13 @@ class TasksController < ApplicationController
     end
   end 
   
-
+# ログイン中のユーザのtask一覧のidがparams[:id]と一致するものがあったら@taskに代入される。なければ@taskはnilになる。
+# @taskに値が入っていなかったら（nilだったら）rootにリダイレクトする
   def edit
+    @task = current_user.tasks.find_by(id: params[:id])
+    unless @task
+     redirect_to login_url
+    end  
   end
 
   def update
