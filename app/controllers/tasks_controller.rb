@@ -3,7 +3,7 @@ class TasksController < ApplicationController
  
  before_action :require_user_logged_in
  before_action :set_task, only: [:show, :edit, :update, :destroy, :edit]
-
+ before_action :correct_user, only: [:show, :edit]
  
 
   def index
@@ -14,10 +14,7 @@ class TasksController < ApplicationController
 
 
   def show
-    @task = current_user.tasks.find_by(id: params[:id])
-    unless @task
-     redirect_to login_url
-    end
+     correct_user
   end
 
   def new
@@ -39,13 +36,9 @@ class TasksController < ApplicationController
     end
   end 
   
-# ログイン中のユーザのtask一覧のidがparams[:id]と一致するものがあったら@taskに代入される。なければ@taskはnilになる。
-# @taskに値が入っていなかったら（nilだったら）rootにリダイレクトする
+
   def edit
-    @task = current_user.tasks.find_by(id: params[:id])
-    unless @task
-     redirect_to login_url
-    end  
+     correct_user
   end
 
   def update
@@ -61,9 +54,8 @@ class TasksController < ApplicationController
 
   def destroy
     @task.destroy
-    
     flash[:success] = "Task は正常に削除されました"
-    redirect_to tasks_url
+     redirect_to '/'
   end
     
   
@@ -71,6 +63,15 @@ class TasksController < ApplicationController
   
   def set_task
     @task = Task.find(params[:id])
+  end
+  
+# ログイン中のユーザのtask一覧のidがparams[:id]と一致するものがあったら@taskに代入される。なければ@taskはnilになる。
+# @taskに値が入っていなかったら（nilだったら）rootにリダイレクトする
+  def correct_user
+    @task = current_user.tasks.find_by(id: params[:id])
+    unless @task
+     redirect_to '/'
+    end
   end
   
   # Strong Parameter
